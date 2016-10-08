@@ -18,57 +18,110 @@ app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use(express.static('public'))
 
-app.get('/', (req, res) => {   // get info from the form as an object
-  db.collection('quotes').find().toArray((err, result) => {
-    if (err) return console.log(err)
-    res.render('index.ejs', {quotes: result})
+
+
+app.all('/', (req, res) => {
+  if (req.method == "GET"){
+    db.collection('quotes').find().toArray((err, result) => {
+      if (err) return console.log(err)
+      res.render('index.ejs', {quotes: result})
+    });
+  };
+
+  if (req.method == "POST") {
+    if ("quote" in req.body) {
+      db.collection('quotes').save(req.body, (err, result) => {
+        if (err) return console.log(err)
+        console.log('saved to database')
+        res.redirect('/')
       })
-})
-
-
-app.post('/quotes', (req, res) => { // post info to database 
-  if("quote" in req.body){
-    db.collection('quotes').save(req.body, (err, result) => {
-      if (err) return console.log(err)
-      console.log('saved to database')
+    }
+    if ("editQuote" in req.body) {
+      db.collection('quotes').findOneAndUpdate({name: req.body.oldName}, {
+        $set: {
+        name: req.body.newName,
+        quote: req.body.editQuote
+        }
+      }, {
+        sort: {_id: -1},
+        upsert: true
+      }, (err, result) => {
+        if (err) return res.send(err);
       res.redirect('/')
-    })
+      })
+    }
+    if ("nameSearch" in req.body){
+      db.collection('quotes').find({name: req.body.nameSearch}).toArray((err, result) => {
+        if (err) return console.log(err)
+        res.render('index.ejs', {quotes: result});
+      })
+    }
+    if ("nameDelete" in req.body){
+      console.log(req.body.nameDelete);
+      db.collection('quotes').findOneAndDelete({name: req.body.nameDelete}, (err, result) => {
+        if (err) return res.send(err)
+        res.redirect('/');
+      });
+    }
   }
-  else{
-    db.collection('quotes').find({name: req.body.name}).toArray((err, result) => {
-      if (err) return console.log(err)
-      res.render('index.ejs', {quotes: result});
-    })
-  }
-
 });
 
 
-app.post('/change', (req, res) => {   // post persons UPDATED details to db
-    console.log('trying to update  db')
-    console.log(req.body.name);
-    db.collection('quotes').findOneAndUpdate({name: 'Yoda'}, {
-      $set: {
-      name: req.body.name,
-      quote: req.body.quote
-      }
-    }, {
-      sort: {_id: -1},
-      upsert: true
-    }, (err, result) => {
-      if (err) return res.send(err);
-    res.redirect('/')
-    })
-});
+
+// --------------------------------
 
 
-app.delete('/quotes', (req, res) => {  // deletes requested object
-  console.log(req.body.name);
-  db.collection('quotes').findOneAndDelete({name: req.body.name}, (err, result) => {
-    if (err) return res.send(500, err)
-    res.send('A darth vadar quote got deleted')
-  })
-})
+// app.get('/', (req, res) => {   // get info from the form as an object
+//   db.collection('quotes').find().toArray((err, result) => {
+//     if (err) return console.log(err)
+//     res.render('index.ejs', {quotes: result})
+//   });
+// });
+
+
+// app.post('/quotes', (req, res) => { // post info to database 
+//   if("quote" in req.body){
+//     db.collection('quotes').save(req.body, (err, result) => {
+//       if (err) return console.log(err)
+//       console.log('saved to database')
+//       res.redirect('/')
+//     })
+//   }
+//   else{
+//     db.collection('quotes').find({name: req.body.name}).toArray((err, result) => {
+//       if (err) return console.log(err)
+//       res.render('index.ejs', {quotes: result});
+//     })
+//   }
+
+// });
+
+
+// app.post('/change', (req, res) => {   // post persons UPDATED details to db
+//     console.log('trying to update  db')
+//     console.log(req.body.name);
+//     db.collection('quotes').findOneAndUpdate({name: 'Yoda'}, {
+//       $set: {
+//       name: req.body.name,
+//       quote: req.body.quote
+//       }
+//     }, {
+//       sort: {_id: -1},
+//       upsert: true
+//     }, (err, result) => {
+//       if (err) return res.send(err);
+//     res.redirect('/')
+//     })
+// });
+
+
+// app.delete('/quotes', (req, res) => {  // deletes requested object
+//   console.log(req.body.name);
+//   db.collection('quotes').findOneAndDelete({name: req.body.name}, (err, result) => {
+//     if (err) return res.send(500, err)
+//     res.send('A darth vadar quote got deleted')
+//   })
+// })
 
 
 
