@@ -35,7 +35,7 @@ app.post('/quotes', (req, res) => { // post info to database
     })
   }
   else{
-    db.collection('quotes').find({name: req.body.name}).toArray((err, result) => {
+    db.collection('quotes').find({name: req.body.nameSearch}).toArray((err, result) => {
       if (err) return console.log(err)
       res.render('index.ejs', {quotes: result});
     })
@@ -45,12 +45,10 @@ app.post('/quotes', (req, res) => { // post info to database
 
 
 app.post('/change', (req, res) => {   // post persons UPDATED details to db
-    console.log('trying to update  db')
-    console.log(req.body.name);
-    db.collection('quotes').findOneAndUpdate({name: 'Yoda'}, {
+    db.collection('quotes').findOneAndUpdate({name: req.body.oldName}, {
       $set: {
-      name: req.body.name,
-      quote: req.body.quote
+        name: req.body.newName,
+        quote: req.body.editQuote
       }
     }, {
       sort: {_id: -1},
@@ -63,19 +61,8 @@ app.post('/change', (req, res) => {   // post persons UPDATED details to db
 
 
 app.delete('/quotes', (req, res) => {  // deletes requested object
-  console.log(req.body.name);
-  db.collection('quotes').findOneAndDelete({name: req.body.name}, (err, result) => {
-    if (err) return res.send(500, err)
-    res.send('A darth vadar quote got deleted')
-  })
+  db.collection('quotes').findOneAndDelete({name: req.body.nameDelete}, (err, result) => {
+    if (err) return res.send(err)
+    res.redirect('/');
+  });
 })
-
-
-
-
-
-// app.post('/filter', (req, res) => {   // filter only for searched person
-//   console.log(req.body.name);
-  
-// })
-
