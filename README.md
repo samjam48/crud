@@ -1,7 +1,9 @@
-# Repo for Zell's CRUD, Express and MongoDB tutorial
+# Repo for Sam's solution to Zell's CRUD, Express and MongoDB tutorial
 
-- [Demo](https://crud-express-mongo.herokuapp.com)
-- [Tutorial](http://zell-weekeat.com/crud-express-mongodb)
+Added funcitonality to delete or modify searched for user quotes and to display quotes only by a given user.
+
+Also forked the implementation with a version that uses app.all() to have all the routes in one path.
+
 
 ## Installation
 
